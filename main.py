@@ -6,51 +6,23 @@ import requests
 from flask import request, Flask
 from revChatGPT.revChatGPT import Chatbot
 import re
-
+from sqltool import *
 from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
-from speachless.sensitive_filter import SensitiveFilter
-from writer import run_main
-from dialogbot import GPTBot
 import openai
 
 
-# UTF-8转中文
-def replace(matched):
-    h_s = matched.group(1)
-    h_i = int(h_s, base=16)
-    return chr(h_i)
-
-
-def uni_to_cn(s: str):
-    result = re.sub(r"\\u([0-9a-fA-F]{4})", replace, s)
-    return result
-
-
+# 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
     config_data = json.load(jsonfile)
     cqhttp_url = config_data['qbot']['cqhttp_url']
     qq_no = config_data['qbot']['qq_no']
     openai.api_key = config_data['openai']['api_key']
 
-
-config = {}
-
 # 创建一个服务，把当前这个python文件当做一个服务
 server = Flask(__name__)
-# 创建ChatGPT实例
-# chatbot = Chatbot(config, conversation_id=None)
-
-# 创建GPTBot实例
-bot = GPTBot()
-
-# 敏感词筛查
-sf = SensitiveFilter(excludes=["&"])
-
-'''
-接入百度API进行文字检测
-'''
 
 
+# 接入百度API进行文字检测
 def detect_txt(msg):
     # 获取access token
     token = fetch_token()
@@ -71,72 +43,35 @@ def detect_txt(msg):
 def chat(msg):
     # ChatGPT成功交互
     try:
-        # 敏感字检测
-        # include_mgc = sf.find_sensitive_words(msg)
-        include_mgc = detect_txt(msg)
+        # message = chatbot.get_chat_response(msg)['message']
+        # 下面这行代码是获取对话id，如果你需要的话，id就是这么获取的
+        # chatbot.conversation_id
+        start_time = time.time()
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=msg,
+            temperature=0,
+            max_tokens=4000,
+            top_p=1.0,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+        )
+        message = response['choices'][0]['text']
+        # message = uni_to_cn(response)
+        print("返回内容: ")
+        print(message)
+        end_time = time.time()
+        retult_message = message + '\n' + '回答用时:' + str(end_time - start_time) + '秒'
+        # 返回之前，对输出内容进行检测
+        include_mgc = detect_txt(message)
         if include_mgc:
-            message = '你的问题疑似包含涉黄涉政广告内容，请立即撤回，否则我要禁言了'
-            return message
-        else:
-            # message = chatbot.get_chat_response(msg)['message']
-            # 下面这行代码是获取对话id，如果你需要的话，id就是这么获取的
-            # chatbot.conversation_id
-            start_time = time.time()
-            response = openai.Completion.create(
-                model="text-davinci-003",
-                prompt=msg,
-                temperature=0,
-                max_tokens=4000,
-                top_p=1.0,
-                frequency_penalty=0.0,
-                presence_penalty=0.0,
-            )
-            message = response['choices'][0]['text']
-            # message = uni_to_cn(response)
-            print("返回内容: ")
-            print(message)
-            end_time = time.time()
-            retult_message = message + '\n' + '回答用时:' + str(end_time - start_time) + '秒'
-            # 返回之前，对输出内容进行检测
-            include_mgc = detect_txt(message)
-            if include_mgc:
-                retult_message = '你的问题疑似包含涉黄涉政广告内容，请立即撤回，否则我要禁言了'
-            return retult_message
+            retult_message = '你的问题疑似诱导Ai返回涉黄涉政广告内容，请尊重他人，注意自身言论'
+        return retult_message
     # ChatGPT交互失败，调用本地GPT
     except Exception as error:
         print(error)
-        # 敏感字检测
-        include_mgc = detect_txt(msg)
-        if include_mgc:
-            message = '你的问题疑似包含涉黄涉政广告内容，请立即撤回，否则我要禁言了'
-            return message
-        else:
-            message = bot.answer(msg)
-            # message = run_main.main(msg)
-            retult_message = message
-            if include_mgc:
-                retult_message = '你的问题疑似包含涉黄涉政广告内容，请立即撤回，否则我要禁言了'
-            return retult_message
-
-
-# 测试接口，可以用来测试与ChatGPT的交互是否正常，用来排查问题
-@server.route('/chat', methods=['post'])
-def chatapi():
-    requestJson = request.get_data()
-    if requestJson is None or requestJson == "" or requestJson == {}:
-        resu = {'code': 1, 'msg': '请求内容不能为空'}
-        return json.dumps(resu, ensure_ascii=False)
-    data = json.loads(requestJson)
-    print(data)
-    try:
-        msg = chat(data['msg'])
-    except Exception as error:
-        print("接口报错")
-        resu = {'code': 1, 'msg': '请求异常: ' + str(error)}
-        return json.dumps(resu, ensure_ascii=False)
-    else:
-        resu = {'code': 0, 'data': msg}
-        return json.dumps(resu, ensure_ascii=False)
+        retult_message = '内容过长，超过4000个Token的最大输入'
+        return retult_message
 
 
 # 测试接口，可以测试本代码是否正常启动
@@ -154,11 +89,7 @@ def get_message():
         sender = request.get_json().get('sender')  # 消息发送者的资料
         print("收到私聊消息：")
         print(message)
-        # 信息太长执行
-        if len(message) > 100:
-            msg_text = '你太啰嗦了，请精简你的语言'
-        else:
-            msg_text = chat(message)  # 将消息转发给ChatGPT处理
+        msg_text = chat(message)  # 将消息转发给ChatGPT处理
         send_private_message(uid, msg_text)  # 将消息返回的内容发送给用户
     if request.get_json().get('message_type') == 'group':  # 如果是群消息
         gid = request.get_json().get('group_id')  # 群号
@@ -169,12 +100,37 @@ def get_message():
             sender = request.get_json().get('sender')
             print("收到群聊消息：")
             print(message)
-            # 信息太长执行
-            if len(message) > 100:
-                msg_text = '你太啰嗦了，请精简你的语言'
+            # 敏感内容检测
+            include_mgc = detect_txt(message)
+            # 检查用户是否在数据库中
+            if user_isexist(uid):
+                # 用户存在，查询其剩余次数
+                num_TextChance = select_TextChance(uid)
+                if int(num_TextChance) == 0:
+                    msg_text = "你今日次数已耗尽，请明日再来\nTips：讨好群主可解锁更多次数"
+                    msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                else:
+                    # 更新用户信息
+                    update_user(uid, message)
+                    if include_mgc:
+                        clear_user(uid)
+                        msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                        msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                    else:
+                        msg_text = chat(message)  # 将消息转发给ChatGPT处理
+                        msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text) + "\n你今日还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance)-1)  # @发言人
             else:
-                msg_text = chat(message)  # 将消息转发给ChatGPT处理
-            msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)  # @发言人
+                # 加入新用户
+                insert_user(uid, message)
+                # 更新用户信息
+                update_user(uid, message)
+                if include_mgc:
+                    clear_user(uid)
+                    msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                    msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                else:
+                    msg_text = chat(message)  # 将消息转发给ChatGPT处理
+                    msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text) + "\n你今日还剩2次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
             send_group_message(gid, msg_text)  # 将消息转发到群里
     if request.get_json().get('post_type') == 'request':  # 收到请求消息
         print("收到请求消息")
