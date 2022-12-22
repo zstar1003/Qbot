@@ -107,7 +107,7 @@ def get_message():
                 # 用户存在，查询其剩余次数
                 num_TextChance = select_TextChance(uid)
                 if int(num_TextChance) == 0:
-                    msg_text = "你今日次数已耗尽，请明日再来\nTips：讨好群主可解锁更多次数"
+                    msg_text = "你今日次数已耗尽，请明日再来\nTips：参与Q群机器人共创项目(PR或star)均有机会解锁额外次数\nhttps://github.com/zstar1003/Qbot"
                     msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                 else:
                     # 更新用户信息
