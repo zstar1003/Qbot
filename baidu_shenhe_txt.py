@@ -14,6 +14,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
+# 载入数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
     config_data = json.load(jsonfile)
     API_KEY = config_data['baidu']['API_KEY']
@@ -23,13 +24,7 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     TOKEN_URL = config_data['baidu']['TOKEN_URL']
 
 
-
-
-"""
-    获取token
-"""
-
-
+# 获取token
 def fetch_token():
     params = {'grant_type': 'client_credentials',
               'client_id': API_KEY,
