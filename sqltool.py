@@ -39,6 +39,18 @@ def update_user(qq_no, message):
     conn.close()
 
 
+# 用户信息更新(图片信息)
+def update_user_pic(qq_no):
+    conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
+    cur = conn.cursor()
+    # 图片次数减1
+    sql_order = 'UPDATE `group` SET PicChance = PicChance - 1 WHERE qq_no = %s' % qq_no
+    cur.execute(sql_order)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 # 用户文字次数查询
 def select_TextChance(qq_no):
     conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
@@ -50,12 +62,26 @@ def select_TextChance(qq_no):
     conn.close()
     return result[0]
 
+# 用户图片次数查询
+def select_PicChance(qq_no):
+    conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
+    cur = conn.cursor()
+    sql_order = 'select PicChance from `group` WHERE qq_no = %s' % qq_no
+    cur.execute(sql_order)
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    return result[0]
 
-# 清空用户的文字次数
+
+# 清空用户的次数
 def clear_user(qq_no):
     conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
     cur = conn.cursor()
     sql_order = 'UPDATE `group` SET TextChance = 0 WHERE qq_no = %s' % qq_no
+    cur.execute(sql_order)
+    conn.commit()
+    sql_order = 'UPDATE `group` SET PicChance = 0 WHERE qq_no = %s' % qq_no
     cur.execute(sql_order)
     conn.commit()
     cur.close()
