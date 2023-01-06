@@ -43,7 +43,7 @@
 4.运行`main.py`即可work
 
 
-# To dox
+# To do
  - [x] 加入Ai绘图Api
  - [ ] 加入Ai图像超分
  - [ ] 加入Ai文字转语音
