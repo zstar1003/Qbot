@@ -1,11 +1,8 @@
 import json
 import time
 from urllib.parse import urlencode
-from urllib.request import Request
 import requests
 from flask import request, Flask
-from revChatGPT.revChatGPT import Chatbot
-import re
 from sqltool import *
 from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
 import openai
