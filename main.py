@@ -66,7 +66,7 @@ def chat(msg):
     # ChatGPT交互失败，调用本地GPT
     except Exception as error:
         print(error)
-        retult_message = '内容过长，超过4000个Token的最大输入'
+        retult_message = '输入过长或过于苛刻，换个问题试试吧。'
         return retult_message
 
 
