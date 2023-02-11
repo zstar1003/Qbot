@@ -2,6 +2,8 @@
 一个正在使用的Q群机器人项目
 
 # 更新日志
+2022-02-11
+上游重新支持ChatGPT逆向接口，ChatGPT机器人回归！
 
 2022-12-25
 加入DALL·E图像生成Api，并纳入数据库进行次数管理
@@ -15,7 +17,7 @@
 更新进度后续将同步在我的CSDN博客：[https://blog.csdn.net/qq1198768105/category_12147929.html](https://blog.csdn.net/qq1198768105/category_12147929.html)
 
 # 使用方式
-1.修改`QBot/config.yml`中的QQ号
+1.修改`QBot/config.yml`中的QQ号，openai的账号密码
 
 2.运行`QBot/go-cqhttp.bat`，弹出二维码扫码登陆
 
@@ -24,7 +26,9 @@
 ```python
 {
     "openai": {
-        "api_key": "openAi的api_key"
+        "api_key": "openAi的api_key",
+        "openai_no": "openAi的账号",
+        "openai_password": "openAi的密码"
     },
    "qbot": {
         "cqhttp_url": "http://localhost:8700",

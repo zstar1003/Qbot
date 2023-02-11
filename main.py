@@ -6,16 +6,25 @@ from flask import request, Flask
 from sqltool import *
 from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
 import openai
+from revChatGPT.Unofficial import Chatbot
+
 
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
     config_data = json.load(jsonfile)
     cqhttp_url = config_data['qbot']['cqhttp_url']
     qq_no = config_data['qbot']['qq_no']
+    openai_email = config_data['openai']['opai_email']
+    openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
 
 # 创建一个服务，把当前这个python文件当做一个服务
 server = Flask(__name__)
+
+chatbot = Chatbot({
+  "email": openai_email,
+  "password": openai_password
+}, conversation_id=None, parent_id=None) # You can start a custom conversation
 
 
 # 接入百度API进行文字检测
@@ -39,21 +48,20 @@ def detect_txt(msg):
 def chat(msg):
     # ChatGPT成功交互
     try:
-        # message = chatbot.get_chat_response(msg)['message']
-        # 下面这行代码是获取对话id，如果你需要的话，id就是这么获取的
-        # chatbot.conversation_id
         start_time = time.time()
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=msg,
-            temperature=0,
-            max_tokens=4000,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0,
-        )
-        message = response['choices'][0]['text']
-        # message = uni_to_cn(response)
+        # 调用GPT-3
+        # response = openai.Completion.create(
+        #     model="text-davinci-003",
+        #     prompt=msg,
+        #     temperature=0,
+        #     max_tokens=4000,
+        #     top_p=1.0,
+        #     frequency_penalty=0.0,
+        #     presence_penalty=0.0,
+        # )
+        # message = response['choices'][0]['text']
+        # 调用Chatgpt
+        message = chatbot.ask(msg, conversation_id=None, parent_id=None)['message']
         print("返回内容: ")
         print(message)
         end_time = time.time()
@@ -66,7 +74,7 @@ def chat(msg):
     # ChatGPT交互失败，调用本地GPT
     except Exception as error:
         print(error)
-        retult_message = '输入过长或过于苛刻，换个问题试试吧。'
+        retult_message = '服务器未正常响应，原因：' + str(error)
         return retult_message
 
 
