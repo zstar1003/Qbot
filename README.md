@@ -44,7 +44,10 @@
 }
 ```
 
-4.运行`main.py`即可work
+4.安装配置mysql数据库，修改sqltool.py中自己的数据库密码
+
+
+5.运行`main.py`即可work
 
 
 # To do

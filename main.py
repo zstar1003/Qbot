@@ -24,7 +24,7 @@ server = Flask(__name__)
 chatbot = Chatbot({
   "email": openai_email,
   "password": openai_password
-}, conversation_id=None, parent_id=None) # You can start a custom conversation
+}, conversation_id=None, parent_id=None)  # You can start a custom conversation
 
 
 # 接入百度API进行文字检测
