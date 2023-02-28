@@ -1,5 +1,4 @@
 import json
-import sys
 import time
 from urllib.parse import urlencode
 import requests
@@ -8,7 +7,6 @@ from sqltool import *
 from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
 import openai
 from revChatGPT.V1 import Chatbot
-import asyncio
 
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
@@ -18,6 +16,7 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
+    KEY = config_data['writesonic']['Key']
 
 # 创建一个服务，把当前这个python文件当做一个服务
 server = Flask(__name__)
@@ -53,6 +52,20 @@ def gpt_ask(msg):
         message = data["message"]
     return message
 
+
+def gpt_chatsonic(msg):
+    url = "https://api.writesonic.com/v2/business/content/ans-my-ques?engine=economy&language=zh&num_copies=1"
+    payload = {"question": msg}
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-API-KEY": KEY
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    return response.text[10:-3]
+
 # 与ChatGPT交互的方法
 def chat(msg):
     # ChatGPT成功交互
@@ -69,16 +82,10 @@ def chat(msg):
         #     presence_penalty=0.0,
         # )
         # message = response['choices'][0]['text']
-        # 调用Chatgpt(V2)
-        # loop = asyncio.get_event_loop()
-        # loop = asyncio.new_event_loop()
-        # asyncio.set_event_loop(loop)
-        # task = loop.create_task(gpt_ask(msg))
-        # loop.run_until_complete(task)
-        # loop.close()
-        # message = task.result()
         # 调用Chatgpt(V1)
-        message = gpt_ask(msg)
+        # message = gpt_ask(msg)
+        # 调用chatsonic
+        message = gpt_chatsonic(msg)
         print("返回内容: ")
         print(message)
         end_time = time.time()
