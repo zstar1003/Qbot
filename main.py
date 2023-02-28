@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 from urllib.parse import urlencode
 import requests
@@ -6,8 +7,8 @@ from flask import request, Flask
 from sqltool import *
 from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
 import openai
-from revChatGPT.Unofficial import Chatbot
-
+from revChatGPT.V1 import Chatbot
+import asyncio
 
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
@@ -20,11 +21,6 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
 
 # 创建一个服务，把当前这个python文件当做一个服务
 server = Flask(__name__)
-
-chatbot = Chatbot({
-  "email": openai_email,
-  "password": openai_password
-}, conversation_id=None, parent_id=None) # You can start a custom conversation
 
 
 # 接入百度API进行文字检测
@@ -43,6 +39,27 @@ def detect_txt(msg):
     else:
         return False
 
+# async def gpt_ask(msg):
+#     message = []
+#     chatbot = Chatbot(email="1198768105@qq.com", password="zxy100300")
+#     async for line in chatbot.ask(msg):
+#         message.append(line["choices"][0]["text"].replace("<|im_end|>", ""))
+#         sys.stdout.flush()
+#     message = ''.join(message)
+#     return message
+
+def gpt_ask(msg):
+    chatbot = Chatbot(config={
+        "email": "1198768105@qq.com",
+        "password": "zxy100300"
+    })
+    for data in chatbot.ask(
+        msg,
+        conversation_id=chatbot.config.get("conversation"),
+        parent_id=chatbot.config.get("parent_id"),
+    ):
+        message = data["message"]
+    return message
 
 # 与ChatGPT交互的方法
 def chat(msg):
@@ -60,8 +77,16 @@ def chat(msg):
         #     presence_penalty=0.0,
         # )
         # message = response['choices'][0]['text']
-        # 调用Chatgpt
-        message = chatbot.ask(msg, conversation_id=None, parent_id=None)['message']
+        # 调用Chatgpt(V2)
+        # loop = asyncio.get_event_loop()
+        # loop = asyncio.new_event_loop()
+        # asyncio.set_event_loop(loop)
+        # task = loop.create_task(gpt_ask(msg))
+        # loop.run_until_complete(task)
+        # loop.close()
+        # message = task.result()
+        # 调用Chatgpt(V1)
+        message = gpt_ask(msg)
         print("返回内容: ")
         print(message)
         end_time = time.time()
@@ -69,7 +94,7 @@ def chat(msg):
         # 返回之前，对输出内容进行检测
         include_mgc = detect_txt(message)
         if include_mgc:
-            retult_message = '你的问题疑似诱导Ai返回涉黄涉政广告内容，请尊重他人，注意自身言论'
+            retult_message = '你的问题疑似诱导Ai返回敏感内容，请尊重他人，注意自身言论'
         return retult_message
     # ChatGPT交互失败，调用本地GPT
     except Exception as error:
@@ -117,7 +142,7 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_PicChance = select_PicChance(uid)
                     if int(num_PicChance) == 0:
-                        msg_text = "你今日图片生成次数已耗尽，请明日再来\nTips：参与Q群机器人共创项目(PR或star)有机会解锁额外次数\nhttps://github.com/zstar1003/Qbot"
+                        msg_text = "你当前次数已耗尽，如需继续使用可联系群主增加次数"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
@@ -125,12 +150,12 @@ def get_message():
                         update_user_pic(uid)
                         if include_mgc:
                             clear_user(uid)
-                            msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                            msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，请尊重他人，注意自身言论'
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                             send_group_message(gid, msg_text)  # 将消息转发到群里
                         else:
                             pic_path = get_openai_image(message)
-                            msg_text = "你今日还剩%d次图像生成使用次数，Ai绘图成本较高，请珍惜次数" % (int(num_PicChance) - 1)  # @发言人
+                            msg_text = "你还剩%d次图像生成使用次数，Ai绘图成本较高，请珍惜次数" % (int(num_PicChance) - 1)  # @发言人
                             send_group_message_image(gid, pic_path, uid, msg_text)
                 else:
                     # 加入新用户
@@ -139,13 +164,13 @@ def get_message():
                     update_user_pic(uid)
                     if include_mgc:
                         clear_user(uid)
-                        msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                        msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
                         msg_text = chat(message)  # 将消息转发给ChatGPT处理
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                            msg_text) + "\n你今日还剩2次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
+                            msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                 # send_group_message(gid, msg_text)  # 将消息转发到群里
             else:
@@ -154,19 +179,19 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_TextChance = select_TextChance(uid)
                     if int(num_TextChance) == 0:
-                        msg_text = "你今日次数已耗尽，请明日再来\nTips：参与Q群机器人共创项目(PR或star)均有机会解锁额外次数\nhttps://github.com/zstar1003/Qbot"
+                        msg_text = "你当前次数已耗尽，如需继续使用可联系群主增加次数"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                     else:
                         # 更新用户信息
                         update_user(uid, message)
                         if include_mgc:
                             clear_user(uid)
-                            msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                            msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         else:
                             msg_text = chat(message)  # 将消息转发给ChatGPT处理
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                                msg_text) + "\n你今日还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
+                                msg_text) + "\n你还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
                 else:
                     # 加入新用户
                     insert_user(uid, message)
@@ -174,12 +199,12 @@ def get_message():
                     update_user(uid, message)
                     if include_mgc:
                         clear_user(uid)
-                        msg_text = '你的问题疑似包含涉黄涉政广告内容，今日剩余次数已被清空，请尊重他人，注意自身言论'
+                        msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                     else:
                         msg_text = chat(message)  # 将消息转发给ChatGPT处理
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                            msg_text) + "\n你今日还剩2次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
+                            msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
                 send_group_message(gid, msg_text)  # 将消息转发到群里
     if request.get_json().get('post_type') == 'request':  # 收到请求消息
         print("收到请求消息")

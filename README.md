@@ -17,11 +17,16 @@
 更新进度后续将同步在我的CSDN博客：[https://blog.csdn.net/qq1198768105/category_12147929.html](https://blog.csdn.net/qq1198768105/category_12147929.html)
 
 # 使用方式
-1.修改`QBot/config.yml`中的QQ号，openai的账号密码
+1.安装配置mysql
+在电脑上安装mysql，并参考 [博文](https://zstar.blog.csdn.net/article/details/128402216) 配置相关数据库和数据表
 
-2.运行`QBot/go-cqhttp.bat`，弹出二维码扫码登陆
+2.访问[百度Ai开放平台](https://ai.baidu.com/) ，创建内容审核应用，获取`API_KEY`和`SECRET_KEY`
 
-3.在根目录下新建`config.json`文件，该文件中各配置信息替换为自己的
+3.修改`QBot/config.yml`中的QQ号，openai的账号密码
+
+4.运行`QBot/go-cqhttp.bat`，弹出二维码扫码登陆
+
+5.在根目录下新建`config.json`文件，该文件中各配置信息替换为自己的
 
 ```python
 {
@@ -32,7 +37,7 @@
     },
    "qbot": {
         "cqhttp_url": "http://localhost:8700",
-        "qq_no": "2986831742"
+        "qq_no": "机器人QQ号"
     },
     "baidu": {
         "API_KEY": "百度内容审核平台的API_KEY",
@@ -44,7 +49,7 @@
 }
 ```
 
-4.运行`main.py`即可work
+6.运行`main.py`
 
 
 # To do
@@ -54,8 +59,7 @@
 
 如果您有任何想法和建议，均可在此项目中提issue
 
-# 交流群
-目前机器人部署在Q群：710413249，欢迎测试体验。
+
 
 
 

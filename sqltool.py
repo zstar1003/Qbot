@@ -1,11 +1,11 @@
 import pymysql
 
 
-# 初始化：每个用户给予三次文字机会
+# 初始化：每个用户给予100次文字机会
 def init_user():
     conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
     cur = conn.cursor()
-    sql_order = 'UPDATE `group` SET TextChance = 3'
+    sql_order = 'UPDATE `group` SET TextChance = 100'
     cur.execute(sql_order)
     conn.commit()
     cur.close()
@@ -16,7 +16,7 @@ def init_user():
 def insert_user(qq_no, message):
     conn = pymysql.connect(host="localhost", port=3306, user="root", password="zxy100300", database="qbot")
     cur = conn.cursor()
-    sql_order = 'INSERT INTO `group` (qq_no, TextChance, PicChance, Message) VALUES ("%s", 3, 3, "%s")' % (qq_no, message)
+    sql_order = 'INSERT INTO `group` (qq_no, TextChance, PicChance, Message) VALUES ("%s", 100, 3, "%s")' % (qq_no, message)
     cur.execute(sql_order)
     conn.commit()
     cur.close()
@@ -104,10 +104,10 @@ def user_isexist(qq_no):
 
 
 if __name__ == '__main__':
-    # init_user()
-    # insert_user('1198768107', '我很帅')
-    # update_user('1198768107', '哈哈')
-    # num_TextChance = select_TextChance('1198768107')
-    # print(num_TextChance)
+    init_user()
+    insert_user('1198768107', '我很帅')
+    update_user('1198768107', '哈哈')
+    num_TextChance = select_TextChance('1198768107')
+    print(num_TextChance)
     # clear_user('1198768107')
-    user_isexist('1198768107')
+    # user_isexist('1198768107')
