@@ -39,19 +39,11 @@ def detect_txt(msg):
     else:
         return False
 
-# async def gpt_ask(msg):
-#     message = []
-#     chatbot = Chatbot(email="1198768105@qq.com", password="zxy100300")
-#     async for line in chatbot.ask(msg):
-#         message.append(line["choices"][0]["text"].replace("<|im_end|>", ""))
-#         sys.stdout.flush()
-#     message = ''.join(message)
-#     return message
 
 def gpt_ask(msg):
     chatbot = Chatbot(config={
-        "email": "1198768105@qq.com",
-        "password": "zxy100300"
+        "email": openai_email,
+        "password": openai_password
     })
     for data in chatbot.ask(
         msg,
