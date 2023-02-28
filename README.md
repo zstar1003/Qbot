@@ -61,7 +61,7 @@ ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有�
 }
 ```
 
-6.运行`main.py`
+6.先运行`QBot/go-cqhttp.bat`，在控制台扫码登录，再`main.py`，持续监听后台信息。
 
 
 # To do

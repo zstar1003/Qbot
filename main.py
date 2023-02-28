@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 import requests
 from flask import request, Flask
 from sqltool import *
-from baidu_shenhe_txt import fetch_token, TEXT_CENSOR, request_baidu
+from baidu_examine import fetch_token, TEXT_CENSOR, request_baidu
 import openai
 from revChatGPT.V1 import Chatbot
 
