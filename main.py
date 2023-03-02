@@ -51,7 +51,7 @@ def ask_gpt(msg):
     return result['content']
 
 
-# 与ChatGPT交互的方法
+# 与ChatGPT交互
 def chat(msg):
     # ChatGPT成功交互
     try:
@@ -113,7 +113,7 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_PicChance = select_PicChance(uid)
                     if int(num_PicChance) == 0:
-                        msg_text = "你当前次数已耗尽，如需继续使用可联系群主增加次数"
+                        msg_text = "你当前次数已耗尽，向我提供新注册的OpenAi账号可享无限使用权"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
@@ -150,7 +150,7 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_TextChance = select_TextChance(uid)
                     if int(num_TextChance) == 0:
-                        msg_text = "你当前次数已耗尽，如需继续使用可联系群主增加次数"
+                        msg_text = "你当前次数已耗尽，向我提供新注册的OpenAi账号可享无限使用权"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                     else:
                         # 更新用户信息
