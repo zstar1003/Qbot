@@ -39,53 +39,24 @@ def detect_txt(msg):
         return False
 
 
-def gpt_ask(msg):
-    chatbot = Chatbot(config={
-        "email": openai_email,
-        "password": openai_password
-    })
-    for data in chatbot.ask(
-        msg,
-        conversation_id=chatbot.config.get("conversation"),
-        parent_id=chatbot.config.get("parent_id"),
-    ):
-        message = data["message"]
-    return message
+def ask_gpt(msg):
+    # OpenAi API
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": msg}
+        ]
+    )
+    result = json.loads(str(completion.choices[0].message))
+    return result['content']
 
-
-def gpt_chatsonic(msg):
-    url = "https://api.writesonic.com/v2/business/content/ans-my-ques?engine=economy&language=zh&num_copies=1"
-    payload = {"question": msg}
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-API-KEY": KEY
-    }
-
-    response = requests.post(url, json=payload, headers=headers)
-
-    return response.text[10:-3]
 
 # 与ChatGPT交互的方法
 def chat(msg):
     # ChatGPT成功交互
     try:
         start_time = time.time()
-        # 调用GPT-3
-        # response = openai.Completion.create(
-        #     model="text-davinci-003",
-        #     prompt=msg,
-        #     temperature=0,
-        #     max_tokens=4000,
-        #     top_p=1.0,
-        #     frequency_penalty=0.0,
-        #     presence_penalty=0.0,
-        # )
-        # message = response['choices'][0]['text']
-        # 调用Chatgpt(V1)
-        # message = gpt_ask(msg)
-        # 调用chatsonic
-        message = gpt_chatsonic(msg)
+        message = ask_gpt(msg)
         print("返回内容: ")
         print(message)
         end_time = time.time()
@@ -129,6 +100,7 @@ def get_message():
             print("收到群聊消息：")
             print(message)
             message = str(message).replace(str("[CQ:at,qq=%s]" % qq_no), '')
+            message = message.replace('"', "'")   # 双引号替换成单引号
             # 敏感内容检测
             include_mgc = detect_txt(message)
             # 前缀判断(用来区分是正常会话还是Ai绘图)

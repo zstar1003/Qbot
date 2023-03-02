@@ -2,6 +2,10 @@
 一个正在使用的Q群机器人项目
 
 # 更新日志
+2023-03-02
+Chatsonic效果不好，弃用。
+ChatGPT API发布，模型名为`gpt-3.5-turbo`，现已加入代码中
+
 2023-02-28
 ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有最多25,000words的免费额度，将自己账户的key填充到后面的配置文件中即可使用。
 
@@ -54,9 +58,6 @@ ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有�
     "mysql": {
         "Root": "数据库用户名",
         "Password": "数据库密码"
-    },
-    "writesonic": {
-        "Key": "自己的"
     }
 }
 ```
