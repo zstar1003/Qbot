@@ -16,7 +16,7 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
-    KEY = config_data['writesonic']['Key']
+
 
 # 创建一个服务，把当前这个python文件当做一个服务
 server = Flask(__name__)
