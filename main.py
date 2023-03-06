@@ -6,7 +6,7 @@ from flask import request, Flask
 from sqltool import *
 from baidu_examine import fetch_token, TEXT_CENSOR, request_baidu
 import openai
-from revChatGPT.V1 import Chatbot
+
 
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
@@ -16,6 +16,8 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
+
+
 
 
 # 创建一个服务，把当前这个python文件当做一个服务
