@@ -7,7 +7,6 @@ from sqltool import *
 from baidu_examine import fetch_token, TEXT_CENSOR, request_baidu
 import openai
 
-
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
     config_data = json.load(jsonfile)
@@ -16,7 +15,6 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
-
 
 # 创建一个服务
 server = Flask(__name__)
@@ -63,6 +61,7 @@ def chat(msg):
         retult_message = message + '\n' + '回答用时:' + str(end_time - start_time) + '秒'
         # 返回之前，对输出内容进行检测
         include_mgc = detect_txt(message)
+        # include_mgc = False
         if include_mgc:
             retult_message = '你的问题疑似诱导Ai返回敏感内容，请尊重他人，注意自身言论'
         return retult_message
@@ -100,9 +99,10 @@ def get_message():
             print("收到群聊消息：")
             print(message)
             message = str(message).replace(str("[CQ:at,qq=%s]" % qq_no), '')
-            message = message.replace('"', "'")   # 双引号替换成单引号
+            message = message.replace('"', "'")  # 双引号替换成单引号
             # 敏感内容检测
             include_mgc = detect_txt(message)
+            # include_mgc = False
             # 前缀判断(用来区分是正常会话还是Ai绘图)
             if message.strip().startswith('生成图像'):
                 message = str(message).replace('生成图像', '')
