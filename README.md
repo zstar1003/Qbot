@@ -1,26 +1,46 @@
 # Qbot
 一个正在使用的Q群机器人项目
 
+# 依赖环境
+使用前需提前进行配置：
+
+- 文本内容审核：百度开放平台
+
+- 数据库：Mysql
+
+- 文字转语音：VITS
+
 # 更新日志
+2023-03-10 
+
+QQ似乎增强了对ip的限制，设置全局代理之后，go-cqhttp机器人框架会连接异常，因此暂时先下线了GPT对话机器人。
+
+作为过渡，临时上线了VITS派蒙复读机，具体使用方式可参考我的另一仓库：[https://github.com/zstar1003/VITS](https://github.com/zstar1003/VITS)
+
 2023-03-02
+
 Chatsonic效果不好，弃用。
+
 ChatGPT API发布，模型名为`gpt-3.5-turbo`，现已加入代码中
 
 2023-02-28
-ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有最多25,000words的免费额度，将自己账户的key填充到后面的配置文件中即可使用。
 
-官方文档：[https://docs.writesonic.com/reference/ans-my-ques_v2businesscontentans-my-ques_post](https://docs.writesonic.com/reference/ans-my-ques_v2businesscontentans-my-ques_post)
+ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有最多25,000words的免费额度。
 
 2023-02-11
+
 上游重新支持ChatGPT逆向接口，ChatGPT机器人回归！
 
 2022-12-25
+
 加入DALL·E图像生成Api，并纳入数据库进行次数管理
 
 2022-12-21
+
 引入mysql数据库进行管理
 
 2022-12-19 
+
 首次提交代码，包含言论审核功能
 
 更新进度后续将同步在我的CSDN博客：[https://blog.csdn.net/qq1198768105/category_12147929.html](https://blog.csdn.net/qq1198768105/category_12147929.html)
@@ -67,15 +87,14 @@ ChatGPT接口不稳定，换用Chatsonic聊天机器人，该产品单用户有�
 
 # To do
  - [x] 加入Ai绘图Api
- - [ ] 加入Ai图像超分
- - [ ] 加入Ai文字转语音
+ - [x] 加入Ai文字转语音
 
 如果您有任何想法和建议，均可在此项目中提issue
 
 # 用户使用方式
 配置完成之后，将机器人拉到QQ群即可使用，目前支持两种方式：
 
-- @机器人的方式来问问题，回复文本信息
+- @机器人后，输入什么内容，它会将输入内容转换成语音输出。
 
 - @机器人后，添加文字“生成图像”，后面加上描述语，回复Ai绘图图片信息。
 

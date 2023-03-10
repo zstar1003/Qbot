@@ -6,6 +6,8 @@ from flask import request, Flask
 from sqltool import *
 from baidu_examine import fetch_token, TEXT_CENSOR, request_baidu
 import openai
+from VITS import vits_infer
+
 
 # 加载数据
 with open("config.json", "r", encoding='utf-8') as jsonfile:
@@ -139,10 +141,11 @@ def get_message():
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
-                        msg_text = chat(message)  # 将消息转发给ChatGPT处理
-                        msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                            msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
-                        send_group_message(gid, msg_text)  # 将消息转发到群里
+                        # msg_text = chat(message)  # 将消息转发给ChatGPT处理
+                        # msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
+                           # msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
+                        # send_group_message(gid, msg_text)  # 将消息转发到群里
+                        send_group_record(gid)
                 # send_group_message(gid, msg_text)  # 将消息转发到群里
             else:
                 # 检查用户是否在数据库中
@@ -152,6 +155,7 @@ def get_message():
                     if int(num_TextChance) == 0:
                         msg_text = "你当前次数已耗尽，向我提供新注册的OpenAi账号可享无限使用权"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                        send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
                         # 更新用户信息
                         update_user(uid, message)
@@ -159,10 +163,13 @@ def get_message():
                             clear_user(uid)
                             msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                            send_group_message(gid, msg_text)  # 将消息转发到群里
                         else:
-                            msg_text = chat(message)  # 将消息转发给ChatGPT处理
-                            msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                                msg_text) + "\n你还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
+                            #msg_text = chat(message)  # 将消息转发给ChatGPT处理
+                            vits_infer.infer(message)
+                            #msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
+                                #msg_text) + "\n你还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
+                            send_group_record(gid)
                 else:
                     # 加入新用户
                     insert_user(uid, message)
@@ -172,11 +179,14 @@ def get_message():
                         clear_user(uid)
                         msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
+                        send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
-                        msg_text = chat(message)  # 将消息转发给ChatGPT处理
-                        msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
-                            msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
-                send_group_message(gid, msg_text)  # 将消息转发到群里
+                        #msg_text = chat(message)  # 将消息转发给ChatGPT处理
+                        vits_infer.infer(message)
+                        #msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
+                            #msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
+                        send_group_record(gid)
+
     if request.get_json().get('post_type') == 'request':  # 收到请求消息
         print("收到请求消息")
         request_type = request.get_json().get('request_type')  # group
@@ -232,6 +242,21 @@ def send_group_message(gid, message):
         print("群消息发送失败")
 
 
+# 发送语音信息
+def send_group_record(gid):
+    try:
+        v_path = r'file:///C:\Users\zxy\Desktop\QQ机器人\data\newtest.wav'
+        message = "[CQ:record,file=" + v_path + "]"
+        res = requests.post(url=cqhttp_url + "/send_group_msg",
+                            params={'group_id': int(gid), 'message': message}).json()
+        if res["status"] == "ok":
+            print("群语音消息发送成功")
+        else:
+            print("群语音消息发送失败，错误信息：" + str(res['wording']))
+    except:
+        print("群语音消息发送失败")
+
+
 # 处理好友请求
 def set_friend_add_request(flag, approve):
     try:
@@ -280,6 +305,7 @@ def get_openai_image(prompt):
     print('图像已生成')
     print(image_url)
     return image_url
+
 
 
 if __name__ == '__main__':
