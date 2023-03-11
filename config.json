@@ -1,0 +1,23 @@
+{
+    "openai": {
+        "api_key": "",
+        "opai_email": "",
+        "openai_password": ""
+    },
+   "qbot": {
+        "cqhttp_url": "http://localhost:8700",
+        "qq_no": ""
+    },
+    "baidu": {
+        "OPEN": "False",
+        "API_KEY": "",
+        "SECRET_KEY": "",
+        "IMAGE_CENSOR": "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined",
+        "TEXT_CENSOR": "https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined",
+        "TOKEN_URL": "https://aip.baidubce.com/oauth/2.0/token"
+    },
+    "mysql": {
+        "Root": "",
+        "Password": ""
+    }
+}
