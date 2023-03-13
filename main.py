@@ -16,7 +16,7 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
-    is_verify = config_data['baidu']['OPEN']
+    is_verify = False
 
 
 # 测试接口，可以测试本代码是否正常启动
@@ -110,6 +110,7 @@ def get_message():
                             vits_infer.infer(msg_text)
                             # msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
                             # msg_text) + "\n你还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
+                            send_group_message(gid, msg_text)  # 将文字消息转发到群里
                             send_group_record(gid)
                 else:
                     # 加入新用户
@@ -126,6 +127,7 @@ def get_message():
                         vits_infer.infer(msg_text)
                         # msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
                         # msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
+                        send_group_message(gid, msg_text)  # 将文字消息转发到群里
                         send_group_record(gid)
 
     if request.get_json().get('post_type') == 'request':  # 收到请求消息
