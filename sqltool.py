@@ -23,7 +23,7 @@ def init_user():
 def insert_user(qq_no, message):
     conn = pymysql.connect(host="localhost", port=3306, user=ROOT, password=PASSWORD, database="qbot")
     cur = conn.cursor()
-    sql_order = 'INSERT INTO `group` (qq_no, TextChance, PicChance, Message) VALUES ("%s", 100, 3, "%s")' % (qq_no, message)
+    sql_order = 'INSERT INTO `group` (qq_no, TextChance, PicChance, Message) VALUES ("%s", 10, 3, "%s")' % (qq_no, message)
     cur.execute(sql_order)
     conn.commit()
     cur.close()

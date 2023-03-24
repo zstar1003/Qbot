@@ -16,7 +16,7 @@ with open("config.json", "r", encoding='utf-8') as jsonfile:
     openai_email = config_data['openai']['opai_email']
     openai_password = config_data['openai']['openai_password']
     openai.api_key = config_data['openai']['api_key']
-    is_verify = False
+    is_verify = True
 
 
 # 测试接口，可以测试本代码是否正常启动
@@ -59,7 +59,7 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_PicChance = select_PicChance(uid)
                     if int(num_PicChance) == 0:
-                        msg_text = "你当前次数已耗尽，向我提供新注册的OpenAi账号可享无限使用权"
+                        msg_text = "你当前次数已耗尽，参与(star/fork)QBot共创项目后，可私聊群主获取额外次数，项目地址：https://github.com/zstar1003/Qbot"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
@@ -67,7 +67,7 @@ def get_message():
                         update_user_pic(uid)
                         if include_mgc:
                             clear_user(uid)
-                            msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，请尊重他人，注意自身言论'
+                            msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，如需继续使用，请私聊群主添加次数'
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                             send_group_message(gid, msg_text)  # 将消息转发到群里
                         else:
@@ -81,7 +81,7 @@ def get_message():
                     update_user_pic(uid)
                     if include_mgc:
                         clear_user(uid)
-                        msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
+                        msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，如需继续使用，请私聊群主添加次数'
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
@@ -94,7 +94,7 @@ def get_message():
                     # 用户存在，查询其剩余次数
                     num_TextChance = select_TextChance(uid)
                     if int(num_TextChance) == 0:
-                        msg_text = "你当前次数已耗尽，向我提供新注册的OpenAi账号可享无限使用权"
+                        msg_text = "你当前次数已耗尽，参与(star/fork)QBot共创项目后，可私聊群主获取额外次数，项目地址：https://github.com/zstar1003/Qbot"
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
@@ -102,16 +102,20 @@ def get_message():
                         update_user(uid, message)
                         if include_mgc:
                             clear_user(uid)
-                            msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
+                            msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，如需继续使用，请私聊群主添加次数'
                             msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                             send_group_message(gid, msg_text)  # 将消息转发到群里
                         else:
                             msg_text = chat(message)  # 将消息转发给ChatGPT处理
-                            vits_infer.infer(msg_text)
+                            try:
+                                vits_infer.infer(msg_text)
+                            except:
+                                pass
                             # msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
                             # msg_text) + "\n你还剩%d次使用次数，请珍惜次数，问我一些有价值有意义的问题" % (int(num_TextChance) - 1)  # @发言人
                             send_group_message(gid, msg_text)  # 将文字消息转发到群里
                             send_group_record(gid)
+
                 else:
                     # 加入新用户
                     insert_user(uid, message)
@@ -119,16 +123,20 @@ def get_message():
                     update_user(uid, message)
                     if include_mgc:
                         clear_user(uid)
-                        msg_text = '你的问题疑似包含敏感内容，剩余次数已被清空，请尊重他人，注意自身言论'
+                        msg_text = '你的问题疑似包含敏感内容，当前剩余次数已被清空，如需继续使用，请私聊群主添加次数'
                         msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(msg_text)
                         send_group_message(gid, msg_text)  # 将消息转发到群里
                     else:
                         msg_text = chat(message)  # 将消息转发给ChatGPT处理
-                        vits_infer.infer(msg_text)
+                        try:
+                            vits_infer.infer(msg_text)
+                        except:
+                            pass
                         # msg_text = str('[CQ:at,qq=%s]\n' % uid) + str(
                         # msg_text) + "\n你还剩99次使用次数，请珍惜次数，问我一些有价值有意义的问题"  # @发言人
                         send_group_message(gid, msg_text)  # 将文字消息转发到群里
                         send_group_record(gid)
+
 
     if request.get_json().get('post_type') == 'request':  # 收到请求消息
         print("收到请求消息")
@@ -140,7 +148,7 @@ def get_message():
             print("收到加好友申请")
             print("QQ：", uid)
             print("验证信息", comment)
-            # 直接拒接
+            # 直接拒绝
             set_friend_add_request(flag, "false")
         if request_type == "group":
             print("收到群请求")
@@ -155,20 +163,6 @@ def get_message():
                 # 直接拒绝
                 set_group_invite_request(flag, "false")
     return "ok"
-
-
-# 发送私聊消息方法 uid为qq号，message为消息内容
-def send_private_message(uid, message):
-    try:
-        res = requests.post(url=cqhttp_url + "/send_private_msg",
-                            params={'user_id': int(uid), 'message': message}).json()
-        if res["status"] == "ok":
-            print("私聊消息发送成功")
-        else:
-            print(res)
-            print("私聊消息发送失败，错误信息：" + str(res['wording']))
-    except:
-        print("私聊消息发送失败")
 
 
 # 发送文字信息
